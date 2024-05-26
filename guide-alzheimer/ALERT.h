@@ -1,6 +1,7 @@
 #ifndef ALERT_H
 #define ALERT_H
 #include <Arduino.h>
+#include <RTClib.h>
 
 struct MedTime {
   int hour;
@@ -9,7 +10,7 @@ struct MedTime {
 
 void setupClock ();
 
-void loopAlert ();
+void loopHorloge ();
 
 int getItemIndex(MedTime myTable[], int taille);
 
@@ -18,6 +19,5 @@ void addAppointment(MedTime myTable[], int taille, MedTime appointment);
 void alertPatient(MedTime myTable[], int taille);
 
 void alert();
-
 
 #endif

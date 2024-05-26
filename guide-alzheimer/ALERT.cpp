@@ -1,13 +1,14 @@
+#include "HardwareSerial.h"
 #include "ALERT.h"
-#include <RTClib.h>
+#include "mp3tf16p.h"
+
+MP3Player mp3(10,11);
 
 RTC_PCF8523 rtc;
-
-int pinAudio = 12;
-MedTime drugAppointments[20];
+MedTime drugAppointments[1];
 
 void setupClock () {
-  pinMode(ledPin, OUTPUT);
+  mp3.initialize();
   #ifndef ESP8266
     while (!Serial); // wait for serial port to connect. Needed for native USB
   #endif
@@ -19,8 +20,8 @@ void setupClock () {
     }
 
     if (! rtc.initialized() || rtc.lostPower()) {
-      //Serial.println("RTC is NOT initialized, let's set the time!");
-      //rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+      Serial.println("RTC is NOT initialized, let's set the time!");
+      rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
     }
 
     rtc.start();
@@ -29,15 +30,12 @@ void setupClock () {
     float deviation_ppm = (drift / period_sec * 1000000); //  deviation in parts per million (μs)
     float drift_unit = 4.34; // use with offset mode PCF8523_TwoHours
     int offset = round(deviation_ppm / drift_unit);
-    //Serial.print("Offset is "); Serial.println(offset); // Print to control offset
 
-    MedTime morningDrugAppt; morningDrugAppt.hour = 17; morningDrugAppt.minute = 40;drugAppointments[0] = morningDrugAppt;
-    MedTime midDayDrugAppt; midDayDrugAppt.hour = 20; midDayDrugAppt.minute = 33;drugAppointments[1] = midDayDrugAppt;
-    MedTime eveningDrugAppt; eveningDrugAppt.hour = 20; eveningDrugAppt.minute = 37;drugAppointments[2] = eveningDrugAppt;
+    MedTime morningDrugAppt; morningDrugAppt.hour = 3; morningDrugAppt.minute = 8;drugAppointments[0] = morningDrugAppt;
 }
 
-void loopAlert () {
-    alertPatient(drugAppointments, 20);
+void loopHorloge () {
+  alertPatient(drugAppointments, 1);
 }
 
 int getItemIndex(MedTime myTable[], int taille) {
@@ -54,18 +52,19 @@ void addAppointment(MedTime myTable[], int taille, MedTime appointment) {
 }
 
 void alertPatient(MedTime myTable[], int taille) {
-  int index = getItemIndex(myTable, taille);
   DateTime now = rtc.now();
-  Serial.print(now.hour());Serial.print(":");Serial.println(now.minute());
-  for(int i=0; i<index; i++) {
-    if(myTable[i].hour == now.hour() && myTable[i].minute == (now.minute()+5)) {
+  Serial.print("L'heure venant du module horloge: ");Serial.print(now.hour() + 1);Serial.print(":");Serial.println(now.minute());
+  delay(300);
+  for(int i=0; i<1; i++) {
+    if(myTable[i].hour == now.hour() && myTable[i].minute == (now.minute())) {
       alert();
     }
   }
 }
 
 void alert() {
-  digitalWrite(pinAudio, HIGH); // play audio message to alert the patient about his drug take time
+  mp3.playTrackNumber(1, 30);
+  delay(20*1000);
 }
 
 

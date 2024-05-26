@@ -1,6 +1,9 @@
 #ifndef GSM_H
 #define GSM_H
 #include <Arduino.h>
+#include <SoftwareSerial.h>
+
+SoftwareSerial GSM(3,2);
 
 void setupGSM();
 
